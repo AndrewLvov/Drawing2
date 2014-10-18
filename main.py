@@ -2,6 +2,10 @@ from tkinter import Tk, Canvas, BOTH
 from math import sqrt
 
 
+WIDTH = 400
+HEIGHT = 400
+
+
 class Shape:
     def __init__(self, canvas, x, y):
         self.canvas = canvas
@@ -39,6 +43,22 @@ class Rectangle(Shape):
         self.canvas.create_rectangle(left, top, right, bottom)
 
 
+class XSquareGraph(Shape):
+    def __init__(self, canvas, x, y, left, right):
+        super(XSquareGraph, self).__init__(canvas, x, y)
+        self.left = left
+        self.right = right
+
+    def draw(self):
+        def f(x):
+            return x*x
+        start_x = self.left
+        for i in range(self.left, self.right):
+            self.canvas.create_line(start_x + self.x, HEIGHT - (f(start_x) + self.y),
+                                    i + self.x, HEIGHT - (f(i) + self.y))
+            start_x = i
+
+
 def draw_from_script(filename, canvas):
     with open(filename, 'r') as f:
         for line in f:
@@ -61,19 +81,26 @@ def draw_from_script(filename, canvas):
                 # получится вызов Rectangle(canvas, x, y, 200, 200)
                 r = Rectangle(canvas, x, y, *params)
                 r.draw()
+            elif shape == 'x2_graph':
+                g = XSquareGraph(canvas, x, y, *params)
+                g.draw()
+
+
+def draw_custom(canvas):
+    canvas.create_line(0, 0, 50, 50)
 
 
 def main():
-    WIDTH = 400
-    HEIGHT = 400
-
     root = Tk()
     root.title = 'BitCoin graph'
     root.geometry("{}x{}".format(WIDTH, HEIGHT))
     canvas = Canvas(root)
     canvas.pack(fill=BOTH, expand=1)
 
-    draw_from_script('shapes.txt', canvas)
+    try:
+        draw_from_script('shapes.txt', canvas)
+    except IOError:
+        draw_custom(canvas)
 
     root.mainloop()
 
